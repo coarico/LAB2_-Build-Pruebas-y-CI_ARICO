@@ -1,0 +1,26 @@
+name: CI # Nombre del workflow de integración continua
+
+on:
+  # Ejecuta el workflow en push a main y feature/withdraw, y en pull request a main
+  push:
+    branches: [ main, feature/withdraw ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # El job se ejecuta en una máquina virtual Ubuntu
+    steps:
+      - name: Checkout code # Descarga el código del repositorio
+        uses: actions/checkout@v4
+      - name: Set up JDK 17 # Instala y configura Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Dar permisos a gradlew # Da permisos de ejecución al script gradlew
+        run: chmod +x ./gradlew
+      - name: Build with Gradle # Compila el proyecto con Gradle
+        run: ./gradlew build
+      - name: Run tests # Ejecuta los tests con Gradle
+        run: ./gradlew test
