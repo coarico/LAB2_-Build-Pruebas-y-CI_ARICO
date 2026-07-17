@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class WalletServiceTest {
+
     private WalletRepository walletRepository;
     private WalletService walletService;
     private RiskClient riskClient;
@@ -26,6 +27,38 @@ public class WalletServiceTest {
         walletRepository = Mockito.mock(WalletRepository.class);
         riskClient = Mockito.mock(RiskClient.class);
         walletService = new WalletService(walletRepository, riskClient);
+    }
+
+    @Test
+    void withdraw_successful_shouldUpdateBalance_andSave() {
+        // Arrange
+        Wallet wallet = new Wallet("ana@espe.edu.ec", 500.0);
+        String walletId = wallet.getId();
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        when(walletRepository.save(any(Wallet.class))).thenAnswer(i -> i.getArguments()[0]);
+        ArgumentCaptor<Wallet> captor = ArgumentCaptor.forClass(Wallet.class);
+
+        // Act
+        double newBalance = walletService.withdraw(walletId, 200.0);
+
+        // Assert
+        assertEquals(300.0, newBalance);
+        verify(walletRepository).save(captor.capture());
+        Wallet saved = captor.getValue();
+        assertEquals(300.0, saved.getBalance());
+    }
+
+    @Test
+    void withdraw_insufficientFunds_shouldThrow() {
+        // Arrange
+        Wallet wallet = new Wallet("ana@espe.edu.ec", 100.0);
+        String walletId = wallet.getId();
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> walletService.withdraw(walletId, 200.0));
+        assertEquals("Fondos insuficientes", exception.getMessage());
+        verify(walletRepository, never()).save(any());
     }
 
     @Test
@@ -56,9 +89,7 @@ public class WalletServiceTest {
         String invalidEmail = "josue-espe.edu.ec";
 
         //Act & Assert
-        assertThrows(IllegalArgumentException.class, () ->
-                walletService.createWallet(invalidEmail, 50.0)
-        );
+        assertThrows(IllegalArgumentException.class, () -> walletService.createWallet(invalidEmail, 50.0));
 
         //No se deben llamar a ninguna dependencia porque falla la validación
         verifyNoInteractions(walletRepository, riskClient);
@@ -73,10 +104,9 @@ public class WalletServiceTest {
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-                walletService.deposit(walletId, 60));
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> walletService.deposit(walletId, 60));
 
-        assertEquals("Wallet not found", exception.getMessage());
+        assertEquals("La billetera no se encontró", exception.getMessage());
         verify(walletRepository).findById(walletId);
         verify(walletRepository, never()).save(any());
     }
