@@ -17,7 +17,9 @@ jobs:
           java-version: '17'
       - name: Dar permisos a gradlew # Da permisos de ejecución al script gradlew
         run: chmod +x ./gradlew
-      - name: Build with Gradle # Compila el proyecto y ejecuta los tests
+      - name: Run tests # Ejecuta las pruebas automatizadas
+        run: ./gradlew test
+      - name: Build with Gradle # Compila el proyecto y genera el .jar ejecutable
         run: ./gradlew build
       - name: Publicar artefacto .jar # Publica el archivo .jar generado como artefacto
         uses: actions/upload-artifact@v4
