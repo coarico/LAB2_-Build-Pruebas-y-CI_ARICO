@@ -12,28 +12,35 @@ public class WalletService {
 
     public WalletService(WalletRepository walletRepository, RiskClient riskClient) {
         this.walletRepository = walletRepository;
-        this.riskClient = riskClient;
+        this.riskClient = riskClient;}
+    //Retirar dinero de la cuenta
+    public double withdraw(String walletId, double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero");}
+        Optional<Wallet> found = walletRepository.findById(walletId);
+        if (found.isEmpty()) {
+            throw new IllegalStateException("La billetera no se encontró");}
+        Wallet wallet = found.get();
+        if (wallet.getBalance() < amount) {
+            throw new IllegalStateException("Fondos insuficientes");}
+        wallet.withdraw(amount);
+        walletRepository.save(wallet);
+        return wallet.getBalance();
     }
-
     //Crear cuenta si cumple las reglas de negocio
     public WalletResponse createWallet(String ownerEmail, double initialBalance) {
-
         //Validaciones de casos negativos
         if (ownerEmail == null || ownerEmail.isEmpty() || !ownerEmail.contains("@")) {
-            throw new IllegalArgumentException("Invalid email address");
-        }
+            throw new IllegalArgumentException("Invalid email address");}
         if (initialBalance < 0) {
         throw new IllegalArgumentException("Initial balance cannot be negative");}
-
         //Regla de negocio: usuario bloqueado
         if(riskClient.isBloqued(ownerEmail)) {
             throw new IllegalStateException("User blocked");
         }
         //Regla de negocio: no duplicar cuenta por email
         if (walletRepository.existsByOwnerEmail(ownerEmail)) {
-            throw new IllegalStateException("Wallet already exists");
-        }
-
+            throw new IllegalStateException("Wallet already exists");}
         Wallet wallet = new Wallet(ownerEmail, initialBalance);
         Wallet save = walletRepository.save(wallet);
 
@@ -47,16 +54,13 @@ public class WalletService {
             throw new IllegalArgumentException("Amount cannot be negative");
         }
         Optional<Wallet> found = walletRepository.findById(walletId);
-        if(found.isEmpty()) {
-            throw new IllegalStateException("Wallet not found");
-        }
-
+            if(found.isEmpty()) {
+                throw new IllegalStateException("La billetera no se encontró");
+            }
         Wallet wallet = found.get();
         wallet.deposit(amount);
-
         //Persistimos el nuevo cambio
         walletRepository.save(wallet);
-
         return wallet.getBalance();
 
     }
