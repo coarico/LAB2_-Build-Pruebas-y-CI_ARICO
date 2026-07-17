@@ -32,8 +32,8 @@ public class WalletService {
         //Validaciones de casos negativos
         if (ownerEmail == null || ownerEmail.isEmpty() || !ownerEmail.contains("@")) {
             throw new IllegalArgumentException("Invalid email address");}
-        if (initialBalance < 0) {
-        throw new IllegalArgumentException("Initial balance cannot be negative");}
+        if (initialBalance <= 0) {
+        throw new IllegalArgumentException("Initial balance must be greater than zero");}
         //Regla de negocio: usuario bloqueado
         if(riskClient.isBloqued(ownerEmail)) {
             throw new IllegalStateException("User blocked");
@@ -50,8 +50,8 @@ public class WalletService {
     //Depositar dinero en la cuenta
     public double deposit(String walletId, double amount) {
         //Validaciones
-        if(amount < 0) {
-            throw new IllegalArgumentException("Amount cannot be negative");
+        if(amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
         }
         Optional<Wallet> found = walletRepository.findById(walletId);
             if(found.isEmpty()) {

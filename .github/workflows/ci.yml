@@ -1,12 +1,10 @@
 name: CI # Nombre del workflow de integración continua
-
 on:
   # Ejecuta el workflow en push a main y feature/withdraw, y en pull request a main
   push:
     branches: [ main, feature/withdraw ]
   pull_request:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-latest # El job se ejecuta en una máquina virtual Ubuntu
