@@ -18,6 +18,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Dar permisos a gradlew # Da permisos de ejecución al script gradlew
+        run: chmod +x ./gradlew
       - name: Build with Gradle # Compila el proyecto con Gradle
         run: ./gradlew build
       - name: Run tests # Ejecuta los tests con Gradle
