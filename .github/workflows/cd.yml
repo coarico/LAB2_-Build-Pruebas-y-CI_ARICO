@@ -1,8 +1,8 @@
-name: CD
+name: CD # Workflow de despliegue continuo
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # Se ejecuta automaticamente tras un push a main
 
 jobs:
   deploy:
