@@ -14,6 +14,7 @@ public class WalletService {
         this.walletRepository = walletRepository;
         this.riskClient = riskClient;}
     //Retirar dinero de la cuenta
+    //Valida monto, existencia de wallet y saldo suficiente
     public double withdraw(String walletId, double amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("El monto debe ser mayor que cero");}
